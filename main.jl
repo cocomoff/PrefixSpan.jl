@@ -2,4 +2,4 @@
 
 include("prefixspan.jl")
 using PrefixSpan
-PrefixSpan.run("data2.txt", 1, 0)
+PrefixSpan.run("data2.dat", 1, 0)
