@@ -15,11 +15,12 @@ clear() = Pairdata(Vector{Transaction}(),
 # Algorithm (entry point)
 
 export run, display
-function run(filename, min_sup, num_pat)
+function run(filename, min_sup::Int, num_pat::Int)
     pd = clear()
     read(filename, pd)
-    display(pd)
-    project(pd)
+    # display(pd)
+    pattern = Vector{UInt}()
+    project(pd, min_sup, num_pat, pattern)
 end
 
 function display(pd::Pairdata)
@@ -49,13 +50,54 @@ function read(filename::String, pd::Pairdata)
             end
             trans = (id, itemset)
             push!(pd.database, trans)
-            push!(pd.indices, 0)
+            push!(pd.indices, 1)
             id += 1
         end
     end
 end
 
-function project(pd::Pairdata)
+function print_pattern(projected::Pairdata, pattern::Vector{UInt})
+    for item in pattern
+        print("$item ")
+    end
+    print("\n(")
+    for trans in projected.database
+         print("$(trans[1]) ")
+    end
+    println("): $(length(projected.database))")
+end
+
+function project(projected::Pairdata,
+                 min_sup::Int, num_pat::Int,
+                 pattern::Vector{UInt})
+    if length(projected.database) < min_sup
+        return
+    end
+
+    print_pattern(projected, pattern)
+
+    # maximum size constraint
+    if num_pat != 0 && length(pattern) == num_pat
+        return
+    end
+        
+    # processing 1: count occurrences after indeces
+    map_item = Dict{UInt, UInt}()
+    database = copy(projected.database)
+    for i=1:length(database)
+        itemset = database[i][2]
+        for iter=projected.indices[i]:length(itemset)
+            v = get(map_item, itemset[iter], 0) + 1
+            map_item[itemset[iter]] = v
+        end
+    end
+
+    # debug
+    for key in map_item
+        println(key[1], "->", key[2])
+    end
+
+    # processing 2: make projected database
 end
 
 
