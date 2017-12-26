@@ -1,7 +1,7 @@
 module PrefixSpan
 
 # Data Structure
-export Transaction, Pairdata, clear
+export Transaction, Pairdata
 const Transaction = Tuple{UInt, Vector{UInt}}
 
 type Pairdata
@@ -9,14 +9,14 @@ type Pairdata
     indices::Vector{UInt}
 end
 
-clear() = Pairdata(Vector{Transaction}(),
-                   Vector{UInt}())
+init() = Pairdata(Vector{Transaction}(),
+                  Vector{UInt}())
 
 # Algorithm (entry point)
 
 export run, display
 function run(filename, min_sup::Int, num_pat::Int)
-    pd = clear()
+    pd = init()
     read(filename, pd)
     # display(pd)
     pattern = Vector{UInt}()
@@ -93,11 +93,31 @@ function project(projected::Pairdata,
     end
 
     # debug
-    for key in map_item
-        println(key[1], "->", key[2])
+    if false
+        for key in map_item
+            println(key[1], "->", key[2])
+        end
     end
 
     # processing 2: make projected database
+    keylist = sort(collect(keys(map_item)))
+    for key in keylist
+        pd = init()
+        new_database = pd.database
+        new_indices = pd.indices
+        for i=1:length(database)
+            itemset = copy(database[i][2])
+            for iter=projected.indices[i]:length(itemset)
+                if itemset[iter] == key[1]
+                    push!(new_database, database[i])
+                    push!(new_indices, iter + 1)
+                end
+            end
+        end
+        new_pattern = copy(pattern)
+        push!(new_pattern, key[1])
+        project(pd, min_sup, num_pat, new_pattern)
+    end
 end
 
 
